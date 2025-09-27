@@ -1,245 +1,506 @@
-# Project Nexus - ProDev Backend Engineering Documentation Hub
+# Online Poll System Backend - Project Nexus
 
-## 🎯 Project Objective
+## 🎯 Project Overview
 
-This repository serves as a comprehensive knowledge hub documenting major learnings from the **ProDev Backend Engineering program**. It showcases understanding of backend engineering concepts, tools, and best practices acquired throughout the program, serving as a reference guide for both current and future learners.
+This is a comprehensive **Online Poll System Backend** built with Django REST Framework, designed as a capstone project for the ProDev Backend Engineering program. The system provides real-time voting capabilities with optimized database design and comprehensive API documentation.
 
 ## 🚀 Key Features
 
-- **Comprehensive Documentation**: Covers backend engineering concepts, technologies, and implementation strategies
-- **Challenges & Solutions**: Real-world problems faced and their practical solutions
-- **Best Practices & Takeaways**: Industry best practices and personal insights
-- **Collaboration Hub**: Encourages teamwork between frontend and backend learners
+### **Core Functionality**
+- **Poll Management**: Create, update, and manage polls with multiple options
+- **Real-time Voting**: Cast votes with duplicate prevention and validation
+- **Live Results**: Real-time calculation of vote counts and percentages
+- **User Authentication**: Support for both authenticated and anonymous voting
+- **API Documentation**: Comprehensive Swagger/OpenAPI documentation
 
----
+### **Technical Features**
+- **Scalable Architecture**: Optimized database schema for high-performance operations
+- **Caching Strategy**: Redis-based caching for improved response times
+- **Background Processing**: Celery for asynchronous task processing
+- **Containerization**: Docker support for easy deployment
+- **CI/CD Pipeline**: Automated testing and deployment with GitHub Actions
 
-## 📚 Major Learnings Overview
+## 🛠️ Technologies Used
 
-### Key Technologies Covered
+### **Backend Framework**
+- **Django 4.2.7**: High-level Python web framework
+- **Django REST Framework**: Building robust RESTful APIs
+- **PostgreSQL**: Relational database for data persistence
+- **Redis**: Caching and message broker
 
-#### **Python & Django Framework**
-- **Python Fundamentals**: Object-oriented programming, data structures, and advanced Python concepts
-- **Django Framework**: Model-View-Template (MVT) architecture, ORM, and Django best practices
-- **Django REST Framework**: Building robust and scalable RESTful APIs
-- **Authentication & Authorization**: JWT tokens, session management, and security best practices
+### **Additional Tools**
+- **Celery**: Asynchronous task processing
+- **Docker**: Containerization and deployment
+- **Swagger/OpenAPI**: API documentation
+- **GitHub Actions**: CI/CD pipeline
 
-#### **API Development**
-- **RESTful APIs**: REST principles, HTTP methods, status codes, and API design patterns
-- **GraphQL**: Efficient data fetching, schema design, and query optimization
-- **API Documentation**: Swagger/OpenAPI integration for comprehensive API documentation
-- **API Testing**: Unit testing, integration testing, and API endpoint validation
+## 📋 API Endpoints
 
-#### **Database Technologies**
-- **PostgreSQL**: Advanced relational database concepts, indexing, and query optimization
-- **Database Design**: Normalization, relationships, and schema design principles
-- **ORM Usage**: Django ORM, query optimization, and database migrations
-- **Database Security**: SQL injection prevention and data protection strategies
+### **Poll Management**
+- `GET /api/polls/` - List all polls with filtering options
+- `POST /api/polls/` - Create a new poll (authenticated)
+- `GET /api/polls/{id}/` - Get detailed poll information
+- `PUT/PATCH /api/polls/{id}/` - Update poll (creator only)
+- `DELETE /api/polls/{id}/` - Delete poll (creator only)
 
-#### **Containerization & Deployment**
-- **Docker**: Containerization, Dockerfile creation, and multi-stage builds
-- **Docker Compose**: Multi-container applications and service orchestration
-- **CI/CD Pipelines**: GitHub Actions, automated testing, and deployment strategies
-- **Cloud Deployment**: AWS, Heroku, and other cloud platform integrations
+### **Voting System**
+- `POST /api/polls/{id}/vote/` - Cast a vote
+- `GET /api/polls/{id}/results/` - Get real-time poll results
 
-#### **Background Processing & Message Queues**
-- **Celery**: Asynchronous task processing and distributed task queues
-- **RabbitMQ**: Message broker setup and configuration
-- **Redis**: Caching strategies and session storage
-- **Task Scheduling**: Periodic tasks and cron job management
+### **User Management**
+- `GET /api/user/polls/` - Get user's created polls
+- `GET /api/user/votes/` - Get user's voting history
+- `GET /api/user/profile/` - Get user profile with statistics
 
----
+### **Documentation**
+- `GET /api/docs/` - Interactive Swagger documentation
+- `GET /api/redoc/` - ReDoc documentation
+- `GET /api/schema/` - OpenAPI schema
 
-## 🏗️ Important Backend Development Concepts
+## 🚀 Quick Start
 
-### **Database Design & Architecture**
-- **Normalization**: First, second, and third normal forms for optimal data structure
-- **Indexing Strategies**: Primary, secondary, and composite indexes for performance
-- **Query Optimization**: SQL query analysis and performance tuning
-- **Database Relationships**: One-to-one, one-to-many, and many-to-many relationships
-- **Data Integrity**: Constraints, foreign keys, and referential integrity
+### **Prerequisites**
+- Python 3.11+
+- PostgreSQL 15+
+- Redis 7+
+- Docker (optional)
 
-### **Asynchronous Programming**
-- **Async/Await**: Python asynchronous programming patterns
-- **Concurrency**: Threading vs multiprocessing vs asyncio
-- **Event Loops**: Understanding and implementing event-driven programming
-- **Background Tasks**: Long-running processes and task queuing
-- **WebSockets**: Real-time communication and bidirectional data flow
+### **Local Development Setup**
 
-### **Caching Strategies**
-- **In-Memory Caching**: Redis and Memcached implementation
-- **Database Query Caching**: ORM-level and application-level caching
-- **CDN Integration**: Content delivery networks for static assets
-- **Cache Invalidation**: Strategies for maintaining cache consistency
-- **Performance Monitoring**: Cache hit rates and optimization techniques
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/alx-project-nexus.git
+   cd alx-project-nexus
+   ```
 
-### **System Design & Scalability**
-- **Microservices Architecture**: Service decomposition and communication patterns
-- **Load Balancing**: Horizontal scaling and traffic distribution
-- **Database Sharding**: Data partitioning strategies for large datasets
-- **API Rate Limiting**: Throttling and quota management
-- **Monitoring & Logging**: Application performance monitoring and error tracking
+2. **Create virtual environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
----
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-## 🛠️ Challenges Faced & Solutions Implemented
+4. **Set up environment variables**
+   ```bash
+   cp env.example .env
+   # Edit .env with your configuration
+   ```
 
-### **Challenge 1: Database Performance Optimization**
-**Problem**: Slow query performance affecting API response times
-**Solution**: 
-- Implemented database indexing on frequently queried columns
-- Used Django ORM's `select_related()` and `prefetch_related()` for efficient queries
-- Added database query caching with Redis
-- **Result**: 70% improvement in API response times
+5. **Set up database**
+   ```bash
+   python manage.py migrate
+   python manage.py createsuperuser
+   ```
 
-### **Challenge 2: Handling High-Volume Background Tasks**
-**Problem**: Synchronous processing causing timeouts and poor user experience
-**Solution**:
-- Implemented Celery with Redis as message broker
-- Created task queues for different priority levels
-- Added task monitoring and retry mechanisms
-- **Result**: Seamless background processing with 99.9% task completion rate
+6. **Run the development server**
+   ```bash
+   python manage.py runserver
+   ```
 
-### **Challenge 3: API Security & Authentication**
-**Problem**: Securing API endpoints and managing user sessions
-**Solution**:
-- Implemented JWT token-based authentication
-- Added API rate limiting and request throttling
-- Implemented CORS policies and input validation
-- **Result**: Zero security breaches and robust API protection
+7. **Access the application**
+   - API: http://localhost:8000/api/
+   - Admin: http://localhost:8000/admin/
+   - Documentation: http://localhost:8000/api/docs/
 
-### **Challenge 4: Containerization & Deployment**
-**Problem**: Environment inconsistencies and deployment complexities
-**Solution**:
-- Created Docker containers for consistent environments
-- Implemented CI/CD pipeline with GitHub Actions
-- Added automated testing and deployment stages
-- **Result**: Streamlined deployment process with zero-downtime updates
+### **Docker Setup**
 
----
+1. **Using Docker Compose**
+   ```bash
+   docker-compose up -d
+   ```
 
-## 💡 Best Practices & Personal Takeaways
+2. **Run migrations**
+   ```bash
+   docker-compose exec web python manage.py migrate
+   docker-compose exec web python manage.py createsuperuser
+   ```
 
-### **Code Organization & Structure**
-- **Modular Design**: Break down applications into reusable, maintainable modules
-- **DRY Principle**: Don't Repeat Yourself - create reusable functions and classes
-- **SOLID Principles**: Single responsibility, open/closed, and dependency inversion
-- **Code Documentation**: Comprehensive docstrings and inline comments
+3. **Access the application**
+   - API: http://localhost:8000/api/
+   - Documentation: http://localhost:8000/api/docs/
 
-### **API Design Best Practices**
-- **RESTful Conventions**: Use proper HTTP methods and status codes
-- **Consistent Naming**: Follow naming conventions for endpoints and parameters
-- **Versioning Strategy**: Implement API versioning for backward compatibility
-- **Error Handling**: Provide meaningful error messages and proper HTTP status codes
+## 📊 Performance Features
 
-### **Database Best Practices**
-- **Schema Design**: Plan database structure before implementation
-- **Migration Strategy**: Use version control for database changes
-- **Backup Strategy**: Implement regular database backups and recovery procedures
-- **Performance Monitoring**: Regular query analysis and optimization
+### **Real-time Results**
+- Cached vote counts for instant response
+- Asynchronous result updates
+- Redis-based caching strategy
+- Optimized database queries
 
-### **Security Best Practices**
-- **Input Validation**: Always validate and sanitize user inputs
-- **Authentication**: Implement strong authentication mechanisms
-- **Authorization**: Use role-based access control (RBAC)
-- **Data Encryption**: Encrypt sensitive data at rest and in transit
+### **Scalability**
+- Database indexing for fast queries
+- Pagination for large datasets
+- Background task processing
+- Containerized deployment
 
-### **Testing & Quality Assurance**
-- **Test-Driven Development**: Write tests before implementing features
-- **Coverage Goals**: Aim for high test coverage (80%+)
-- **Integration Testing**: Test API endpoints and database interactions
-- **Performance Testing**: Load testing and stress testing for scalability
+### **Security**
+- Input validation and sanitization
+- Duplicate vote prevention
+- Rate limiting capabilities
+- CORS configuration
 
----
+## 🧪 Testing
 
-## 🤝 Collaboration Hub
-
-### **Collaborate with Fellow Learners**
-
-#### **ProDev Backend Learners**
-- Exchange ideas and develop synergies
-- Organize study and coding sessions
-- Share knowledge and best practices
-- Code reviews and peer learning
-
-#### **ProDev Frontend Learners**
-- Collaborate on full-stack projects
-- Provide backend API endpoints for frontend integration
-- Share project requirements and specifications
-- Joint testing and debugging sessions
-
-### **Where to Collaborate**
-
-#### **💬 Dedicated Discord Channel: #ProDevProjectNexus**
-- Connect with both Frontend and Backend learners
-- Share ideas, ask questions, and provide answers
-- Stay updated with announcements from staff
-- Organize virtual meetups and coding sessions
-
-### **💡 ProDev Tips for Success**
-
-#### **Week 1 Priorities:**
-- 📢 **Communicate your chosen project** in the Discord channel
-- 🔍 **Identify ProDev Frontend learners** working on similar projects
-- 📋 **Create project roadmap** with clear milestones and deadlines
-- 🤝 **Establish collaboration protocols** and communication channels
-
-#### **Ongoing Collaboration:**
-- Regular check-ins and progress updates
-- Shared documentation and knowledge base
-- Pair programming sessions and code reviews
-- Joint testing and deployment strategies
-
----
-
-## 📁 Repository Structure
-
-```
-alx-project-nexus/
-├── README.md                    # This comprehensive documentation
-├── docs/                        # Additional documentation
-│   ├── api-documentation.md     # API endpoint documentation
-│   ├── database-schema.md       # Database design and relationships
-│   └── deployment-guide.md      # Deployment and CI/CD setup
-├── examples/                    # Code examples and snippets
-│   ├── django-projects/         # Django project examples
-│   ├── api-examples/            # REST and GraphQL API examples
-│   └── docker-examples/         # Docker configuration examples
-├── challenges/                  # Challenge solutions and explanations
-│   ├── database-optimization/   # Database performance solutions
-│   ├── authentication/          # Security implementation examples
-│   └── scalability/             # System design and scaling solutions
-└── resources/                   # Learning resources and references
-    ├── tutorials/               # Step-by-step tutorials
-    ├── best-practices/          # Industry best practices
-    └── tools/                   # Recommended tools and extensions
+### **Run Tests**
+```bash
+python manage.py test
 ```
 
+### **Run with Coverage**
+```bash
+pip install pytest-cov
+pytest --cov=polls --cov-report=html
+```
+
+### **API Testing**
+Use the interactive Swagger documentation at `/api/docs/` or import the OpenAPI schema into Postman.
+
+## 📈 Monitoring & Maintenance
+
+### **Management Commands**
+```bash
+# Update poll results cache
+python manage.py update_poll_results
+
+# Update specific poll
+python manage.py update_poll_results --poll-id <poll-id>
+
+# Force update all results
+python manage.py update_poll_results --force
+```
+
+### **Background Tasks**
+- Celery worker processes handle result updates
+- Scheduled tasks for maintenance
+- Health checks for service monitoring
+
+## 🚀 Deployment
+
+### **Render Deployment with PostgreSQL**
+
+#### **Step 1: Create PostgreSQL Database**
+1. Go to [Render Dashboard](https://dashboard.render.com)
+2. Click "New +" → "PostgreSQL"
+3. Configure your database:
+   - **Name**: `poll-system-db` (or your preferred name)
+   - **Database**: `poll_system_db`
+   - **User**: `poll_system_user` (or your preferred username)
+   - **Region**: Choose closest to your users
+4. Copy the **Internal Database URL** details (not the external URL)
+
+#### **Step 2: Create Web Service**
+1. Click "New +" → "Web Service"
+2. Connect your GitHub repository
+3. Choose deployment method:
+
+**Option A: Docker Deployment (Recommended)**
+- Render will automatically detect your `Dockerfile`
+- **Start Command**:
+  ```bash
+  python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --workers 3 poll_system.wsgi:application
+  ```
+
+**Option B: Native Python Deployment**
+- **Build Command**:
+  ```bash
+  pip install -r requirements.txt && python manage.py collectstatic --noinput
+  ```
+- **Start Command**:
+  ```bash
+  python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --workers 3 poll_system.wsgi:application
+  ```
+
+#### **Step 3: Configure Environment Variables**
+Set these in your Render Web Service settings:
+
+**Database Configuration:**
+```
+USE_POSTGRES=True
+DB_NAME=<from your PostgreSQL Internal Database URL>
+DB_USER=<from your PostgreSQL Internal Database URL>
+DB_PASSWORD=<from your PostgreSQL Internal Database URL>
+DB_HOST=<Internal Hostname from PostgreSQL service>
+DB_PORT=5432
+```
+
+**Application Configuration:**
+```
+SECRET_KEY=<generate a strong secret key>
+DEBUG=False
+ALLOWED_HOSTS=<your-service-name.onrender.com>
+```
+
+**Optional Redis Configuration (if using Redis on Render):**
+```
+REDIS_URL=redis://<your-redis-service>:6379/1
+CELERY_BROKER_URL=redis://<your-redis-service>:6379/0
+CELERY_RESULT_BACKEND=redis://<your-redis-service>:6379/0
+```
+
+#### **Step 4: Deploy and Setup**
+1. Click "Create Web Service"
+2. Wait for deployment to complete
+3. Create admin user via Render Shell:
+   ```bash
+   python manage.py createsuperuser
+   ```
+4. Access your application:
+   - **API**: `https://your-service-name.onrender.com/api/`
+   - **Admin**: `https://your-service-name.onrender.com/admin/`
+   - **Documentation**: `https://your-service-name.onrender.com/api/docs/`
+
+### **Production Deployment Checklist**
+- [ ] PostgreSQL database configured
+- [ ] Environment variables set
+- [ ] Database migrations run
+- [ ] Static files collected
+- [ ] Admin user created
+- [ ] Health checks configured
+- [ ] SSL certificate active (automatic on Render)
+
+### **PythonAnywhere Deployment (Student-Friendly)**
+
+#### **Step 1: Create PythonAnywhere Account**
+1. Go to [PythonAnywhere](https://www.pythonanywhere.com)
+2. Sign up for a **Beginner account** (free tier available)
+3. Verify your email address
+
+#### **Step 2: Create Web App**
+1. Go to **Web** tab in your dashboard
+2. Click **"Add a new web app"**
+3. Choose **Django** framework
+4. Select **Python 3.11** (or latest available)
+5. Choose a domain name: `yourusername.pythonanywhere.com`
+
+#### **Step 3: Set Up Database**
+1. Go to **Databases** tab
+2. Click **"Create a new database"**
+3. Choose **PostgreSQL** (if available) or **MySQL**
+4. Note down your database credentials
+
+#### **Step 4: Upload Your Code**
+1. Go to **Files** tab
+2. Navigate to `/home/yourusername/`
+3. Open **Bash console** and clone your repository:
+   ```bash
+   git clone https://github.com/yourusername/alx-project-nexus.git
+   cd alx-project-nexus
+   ```
+
+#### **Step 5: Install Dependencies**
+In the **Bash console**:
+```bash
+pip3.11 install --user -r requirements.txt
+```
+
+#### **Step 6: Configure Environment Variables**
+1. Go to **Web** tab → **Web app configuration**
+2. Click **"Environment variables"**
+3. Add these variables:
+   ```
+   USE_POSTGRES=True
+   DB_NAME=your_database_name
+   DB_USER=your_database_user
+   DB_PASSWORD=your_database_password
+   DB_HOST=yourusername.mysql.pythonanywhere-services.com
+   DB_PORT=3306
+   SECRET_KEY=your-secret-key-here
+   DEBUG=False
+   ALLOWED_HOSTS=yourusername.pythonanywhere.com
+   ```
+
+#### **Step 7: Configure Static Files**
+1. In **Web** tab → **Static files**
+2. Add static files mapping:
+   - **URL**: `/static/`
+   - **Directory**: `/home/yourusername/alx-project-nexus/staticfiles/`
+
+#### **Step 8: Run Migrations and Setup**
+In **Bash console**:
+```bash
+cd /home/yourusername/alx-project-nexus
+python3.11 manage.py migrate
+python3.11 manage.py collectstatic --noinput
+python3.11 manage.py createsuperuser
+```
+
+#### **Step 9: Configure Web App**
+1. Go to **Web** tab → **Web app configuration**
+2. Set **Source code**: `/home/yourusername/alx-project-nexus`
+3. Set **Working directory**: `/home/yourusername/alx-project-nexus`
+4. Set **WSGI configuration file**: `/var/www/yourusername_pythonanywhere_com_wsgi.py`
+
+#### **Step 10: Update WSGI File**
+Edit the WSGI file to point to your project:
+```python
+import os
+import sys
+
+path = '/home/yourusername/alx-project-nexus'
+if path not in sys.path:
+    sys.path.append(path)
+
+os.environ['DJANGO_SETTINGS_MODULE'] = 'poll_system.settings'
+
+from django.core.wsgi import get_wsgi_application
+application = get_wsgi_application()
+```
+
+#### **Step 11: Reload Web App**
+1. Go to **Web** tab
+2. Click **"Reload"** button
+3. Your app should be live at `https://yourusername.pythonanywhere.com`
+
+### **PythonAnywhere Deployment Checklist**
+- [ ] PythonAnywhere account created
+- [ ] Web app configured (Django)
+- [ ] Database created and configured
+- [ ] Code uploaded via Git
+- [ ] Dependencies installed
+- [ ] Environment variables set
+- [ ] Static files configured
+- [ ] Migrations run
+- [ ] Admin user created
+- [ ] WSGI file updated
+- [ ] Web app reloaded
+
+### **PythonAnywhere Troubleshooting**
+
+#### **Common Issues and Solutions:**
+
+**Database Connection Errors:**
+- Verify database credentials in environment variables
+- Check that `USE_POSTGRES=True` is set
+- For MySQL, ensure `DB_PORT=3306`
+
+**Static Files Not Loading:**
+- Verify static files mapping in Web tab
+- Run `python3.11 manage.py collectstatic --noinput`
+- Check that `STATIC_ROOT` is set correctly
+
+**Import Errors:**
+- Ensure all dependencies are installed with `pip3.11 install --user`
+- Check that your project path is in the WSGI file
+
+**WSGI Configuration:**
+- Verify the WSGI file points to your project directory
+- Check that `DJANGO_SETTINGS_MODULE` is set correctly
+
+### **Docker Deployment (Local/Other Platforms)**
+```bash
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+### **CI/CD Pipeline**
+- Automated testing on pull requests
+- Docker image building and pushing
+- Automated deployment to production
+
+### **Troubleshooting Deployment Issues**
+
+#### **Common Issues and Solutions:**
+
+**Database Connection Errors:**
+- Ensure you're using the **Internal Database URL** details, not external
+- Verify all `DB_*` environment variables are set correctly
+- Check that `USE_POSTGRES=True` is set
+
+**Static Files Not Loading:**
+- Ensure `python manage.py collectstatic --noinput` runs during build
+- Verify `STATIC_ROOT` is set correctly in settings
+- Check that WhiteNoise is properly configured
+
+**Migration Errors:**
+- Run migrations manually via Render Shell: `python manage.py migrate`
+- Check for conflicting migrations: `python manage.py showmigrations`
+- Reset migrations if needed: `python manage.py migrate --fake-initial`
+
+**Service Won't Start:**
+- Check Render logs for specific error messages
+- Verify all required environment variables are set
+- Ensure the start command includes both migration and server start
+
+**Health Check Failures:**
+- Verify the health check endpoint `/api/` is accessible
+- Check that the service is binding to `0.0.0.0:8000`
+- Ensure all dependencies are properly installed
+
+## 📚 API Documentation
+
+### **Interactive Documentation**
+- **Swagger UI**: `/api/docs/` - Interactive API explorer
+- **ReDoc**: `/api/redoc/` - Clean, responsive documentation
+- **OpenAPI Schema**: `/api/schema/` - Machine-readable API specification
+
+### **Example API Usage**
+
+#### **Create a Poll**
+```bash
+curl -X POST "http://localhost:8000/api/polls/" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{
+    "title": "What is your favorite programming language?",
+    "description": "Choose your preferred language for backend development",
+    "options": [
+      {"text": "Python", "order": 1},
+      {"text": "JavaScript", "order": 2},
+      {"text": "Java", "order": 3}
+    ]
+  }'
+```
+
+#### **Cast a Vote**
+```bash
+curl -X POST "http://localhost:8000/api/polls/{poll-id}/vote/" \
+  -H "Content-Type: application/json" \
+  -d '{"option_text": "Python"}'
+```
+
+#### **Get Results**
+```bash
+curl "http://localhost:8000/api/polls/{poll-id}/results/"
+```
+
+## 🤝 Collaboration
+
+### **ProDev Backend Engineering Program**
+This project serves as a comprehensive demonstration of backend engineering skills including:
+
+- **API Design**: RESTful API design principles
+- **Database Optimization**: Efficient schema design and query optimization
+- **Real-time Processing**: Asynchronous task handling and caching
+- **Documentation**: Comprehensive API documentation
+- **Testing**: Unit and integration testing
+- **Deployment**: Containerization and CI/CD
+
+### **Frontend Integration**
+The API is designed for easy integration with frontend applications:
+- CORS enabled for cross-origin requests
+- Comprehensive error handling
+- Detailed response formats
+- Real-time result updates
+
+## 📞 Support
+
+For questions or support regarding this project:
+- **GitHub Issues**: Create an issue in this repository
+- **Discord**: Join #ProDevProjectNexus for collaboration
+- **Documentation**: Check the API docs at `/api/docs/`
+
+## 📄 License
+
+This project is part of the ProDev Backend Engineering program and is intended for educational purposes.
+
 ---
 
-## 🎓 Program Impact
+**Project Nexus - Online Poll System Backend**  
+*Demonstrating real-world backend engineering skills with Django, PostgreSQL, and modern development practices.*
 
-This ProDev Backend Engineering program has been transformative in developing:
-
-- **Technical Skills**: Mastery of modern backend technologies and frameworks
-- **Problem-Solving**: Ability to tackle complex real-world challenges
-- **System Thinking**: Understanding of scalable and maintainable architectures
-- **Collaboration**: Enhanced teamwork and communication skills
-- **Professional Growth**: Industry-ready backend development expertise
-
----
-
-## 📞 Contact & Collaboration
-
-- **GitHub**: [alx-project-nexus](https://github.com/yourusername/alx-project-nexus)
-- **Discord**: #ProDevProjectNexus
-- **Email**: [your-email@example.com]
-
----
-
-*This repository is a living document that will continue to grow as new learnings and experiences are gained throughout the ProDev Backend Engineering program.*
-
----
-
-**Last Updated**: December 2024  
-**Version**: 1.0.0  
+**Last Updated**: January 2025  
+**Version**: 1.1.0  
 **Status**: Active Development

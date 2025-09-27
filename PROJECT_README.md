@@ -180,15 +180,89 @@ python manage.py update_poll_results --force
 
 ## 🚀 Deployment
 
-### **Production Deployment**
-1. Set production environment variables
-2. Configure database and Redis
-3. Run migrations
-4. Collect static files
-5. Start services with Gunicorn
-6. Configure reverse proxy (Nginx)
+### **Render Deployment with PostgreSQL**
 
-### **Docker Deployment**
+#### **Step 1: Create PostgreSQL Database**
+1. Go to [Render Dashboard](https://dashboard.render.com)
+2. Click "New +" → "PostgreSQL"
+3. Configure your database:
+   - **Name**: `poll-system-db` (or your preferred name)
+   - **Database**: `poll_system_db`
+   - **User**: `poll_system_user` (or your preferred username)
+   - **Region**: Choose closest to your users
+4. Copy the **Internal Database URL** details (not the external URL)
+
+#### **Step 2: Create Web Service**
+1. Click "New +" → "Web Service"
+2. Connect your GitHub repository
+3. Choose deployment method:
+
+**Option A: Docker Deployment (Recommended)**
+- Render will automatically detect your `Dockerfile`
+- **Start Command**:
+  ```bash
+  python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --workers 3 poll_system.wsgi:application
+  ```
+
+**Option B: Native Python Deployment**
+- **Build Command**:
+  ```bash
+  pip install -r requirements.txt && python manage.py collectstatic --noinput
+  ```
+- **Start Command**:
+  ```bash
+  python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --workers 3 poll_system.wsgi:application
+  ```
+
+#### **Step 3: Configure Environment Variables**
+Set these in your Render Web Service settings:
+
+**Database Configuration:**
+```
+USE_POSTGRES=True
+DB_NAME=<from your PostgreSQL Internal Database URL>
+DB_USER=<from your PostgreSQL Internal Database URL>
+DB_PASSWORD=<from your PostgreSQL Internal Database URL>
+DB_HOST=<Internal Hostname from PostgreSQL service>
+DB_PORT=5432
+```
+
+**Application Configuration:**
+```
+SECRET_KEY=<generate a strong secret key>
+DEBUG=False
+ALLOWED_HOSTS=<your-service-name.onrender.com>
+```
+
+**Optional Redis Configuration (if using Redis on Render):**
+```
+REDIS_URL=redis://<your-redis-service>:6379/1
+CELERY_BROKER_URL=redis://<your-redis-service>:6379/0
+CELERY_RESULT_BACKEND=redis://<your-redis-service>:6379/0
+```
+
+#### **Step 4: Deploy and Setup**
+1. Click "Create Web Service"
+2. Wait for deployment to complete
+3. Create admin user via Render Shell:
+   ```bash
+   python manage.py createsuperuser
+   ```
+4. Access your application:
+   - **API**: `https://your-service-name.onrender.com/api/`
+   - **Admin**: `https://your-service-name.onrender.com/admin/`
+   - **Documentation**: `https://your-service-name.onrender.com/api/docs/`
+
+### **Production Deployment Checklist**
+- [ ] PostgreSQL database configured
+- [ ] Environment variables set
+- [ ] Database migrations run
+- [ ] Static files collected
+- [ ] Admin user created
+- [ ] Health checks configured
+- [ ] SSL certificate active (automatic on Render)
+
+### **Docker Deployment (Local/Other Platforms)**
 ```bash
 docker-compose -f docker-compose.prod.yml up -d
 ```
@@ -197,6 +271,35 @@ docker-compose -f docker-compose.prod.yml up -d
 - Automated testing on pull requests
 - Docker image building and pushing
 - Automated deployment to production
+
+### **Troubleshooting Deployment Issues**
+
+#### **Common Issues and Solutions:**
+
+**Database Connection Errors:**
+- Ensure you're using the **Internal Database URL** details, not external
+- Verify all `DB_*` environment variables are set correctly
+- Check that `USE_POSTGRES=True` is set
+
+**Static Files Not Loading:**
+- Ensure `python manage.py collectstatic --noinput` runs during build
+- Verify `STATIC_ROOT` is set correctly in settings
+- Check that WhiteNoise is properly configured
+
+**Migration Errors:**
+- Run migrations manually via Render Shell: `python manage.py migrate`
+- Check for conflicting migrations: `python manage.py showmigrations`
+- Reset migrations if needed: `python manage.py migrate --fake-initial`
+
+**Service Won't Start:**
+- Check Render logs for specific error messages
+- Verify all required environment variables are set
+- Ensure the start command includes both migration and server start
+
+**Health Check Failures:**
+- Verify the health check endpoint `/api/` is accessible
+- Check that the service is binding to `0.0.0.0:8000`
+- Ensure all dependencies are properly installed
 
 ## 📚 API Documentation
 
@@ -270,6 +373,6 @@ This project is part of the ProDev Backend Engineering program and is intended f
 **Project Nexus - Online Poll System Backend**  
 *Demonstrating real-world backend engineering skills with Django, PostgreSQL, and modern development practices.*
 
-**Last Updated**: December 2024  
-**Version**: 1.0.0  
+**Last Updated**: January 2025  
+**Version**: 1.1.0  
 **Status**: Active Development
