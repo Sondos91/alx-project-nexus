@@ -1,34 +1,21 @@
 """
-Django settings for poll_system project.
+Django settings for poll_system project - PythonAnywhere optimized version.
+This version doesn't use decouple to avoid import issues.
 """
 
 from pathlib import Path
 import os
 
-# Try to import decouple, fallback to os.environ if not available
-try:
-    from decouple import config
-except (ImportError, AttributeError):
-    # Fallback for environments where decouple is not available or has issues
-    def config(key, default=None, cast=None):
-        value = os.environ.get(key, default)
-        if cast and value is not None:
-            try:
-                return cast(value)
-            except (ValueError, TypeError):
-                return value
-        return value
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-production')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-me-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='sondossafwat.pythonanywhere.com', cast=lambda v: [s.strip() for s in v.split(',')])
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'sondossafwat.pythonanywhere.com').split(',')
 
 # Application definition
 INSTALLED_APPS = [
@@ -77,46 +64,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'poll_system.wsgi.application'
 
-# Database
-# Use SQLite for development if PostgreSQL is not available
-USE_POSTGRES = config('USE_POSTGRES', default=False, cast=bool)
-USE_PYTHONANYWHERE = config('USE_PYTHONANYWHERE', default=False, cast=bool)
-
-if USE_PYTHONANYWHERE:
-    # PythonAnywhere MySQL configuration
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': config('DB_NAME', default='sondossafwat$default'),
-            'USER': config('DB_USER', default='sondossafwat$default'),
-            'HOST': config('DB_HOST', default='sondossafwat.mysql.pythonanywhere-services.com'),
-            'PASSWORD': config('DB_PASSWORD', default=''),
-            'PORT': config('DB_PORT', default='3306'),
-            'OPTIONS': {
-                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-                'charset': 'utf8mb4',
-            },
-        }
+# Database - PythonAnywhere MySQL configuration
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('DB_NAME', 'sondossafwat$default'),
+        'USER': os.environ.get('DB_USER', 'sondossafwat$default'),
+        'HOST': os.environ.get('DB_HOST', 'sondossafwat.mysql.pythonanywhere-services.com'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'PORT': os.environ.get('DB_PORT', '3306'),
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            'charset': 'utf8mb4',
+        },
     }
-elif USE_POSTGRES:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': config('DB_NAME', default='poll_system_db'),
-            'USER': config('DB_USER', default='postgres'),
-            'PASSWORD': config('DB_PASSWORD', default='password'),
-            'HOST': config('DB_HOST', default='localhost'),
-            'PORT': config('DB_PORT', default='5432'),
-        }
-    }
-else:
-    # SQLite for local development
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -141,7 +103,7 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = '/staticfiles/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media files
@@ -182,50 +144,34 @@ SPECTACULAR_SETTINGS = {
 }
 
 # CORS settings
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-#     "http://127.0.0.1:3000",
-#     "http://localhost:8080",
-#     "http://127.0.0.1:8080",
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "https://sondossafwat.pythonanywhere.com",
+]
 
-# CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = True
 
 # Celery Configuration
-CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
 # Cache configuration
-# Use local memory cache for development (Redis not required)
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': os.environ.get('REDIS_URL', 'redis://localhost:6379/1'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
     }
 }
 
-# Uncomment below to use Redis (requires Redis server running)
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django_redis.cache.RedisCache',
-#         'LOCATION': config('REDIS_URL', default='redis://localhost:6379/1'),
-#         'OPTIONS': {
-#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-#         }
-#     }
-# }
-
 # Session configuration
-# Use database sessions for development (Redis not required)
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-
-# Uncomment below to use cache sessions (requires Redis)
-# SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-# SESSION_CACHE_ALIAS = 'default'
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
 
 # Security settings for production
 if not DEBUG:

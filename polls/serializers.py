@@ -4,7 +4,9 @@ Provides data validation and serialization for all API endpoints.
 """
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 from django.utils import timezone
+from rest_framework.authtoken.models import Token
 from .models import Poll, PollOption, Vote, PollResult
 
 
@@ -70,8 +72,8 @@ class PollDetailSerializer(serializers.ModelSerializer):
 
 
 class PollCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating new polls."""
-    options = PollOptionCreateSerializer(many=True, write_only=True)
+    """Serializer for creating and updating polls."""
+    options = PollOptionCreateSerializer(many=True)
     
     class Meta:
         model = Poll
@@ -110,7 +112,20 @@ class PollCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Create poll with options."""
         options_data = validated_data.pop('options')
-        validated_data['creator'] = self.context['request'].user
+        
+        # Set creator to authenticated user or anonymous user
+        request = self.context.get('request')
+        
+        if request and hasattr(request, 'user') and request.user.is_authenticated:
+            validated_data['creator'] = request.user
+        else:
+            # Create or get anonymous user for polls
+            anonymous_user, created = User.objects.get_or_create(
+                username='anonymous',
+                defaults={'email': '', 'first_name': '', 'last_name': ''}
+            )
+            validated_data['creator'] = anonymous_user
+        
         poll = Poll.objects.create(**validated_data)
         
         # Create poll options
@@ -122,6 +137,38 @@ class PollCreateSerializer(serializers.ModelSerializer):
             )
         
         return poll
+    
+    def update(self, instance, validated_data):
+        """Update poll with options."""
+        options_data = validated_data.pop('options', [])
+        
+        # Check if user is authenticated and is the creator
+        request = self.context.get('request')
+        if request and hasattr(request, 'user') and request.user.is_authenticated:
+            if instance.creator != request.user:
+                raise serializers.ValidationError("You can only update polls you created.")
+        else:
+            raise serializers.ValidationError("Authentication required to update polls.")
+        
+        # Update poll fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Update poll options
+        if options_data:
+            # Delete existing options
+            instance.options.all().delete()
+            
+            # Create new options
+            for i, option_data in enumerate(options_data):
+                PollOption.objects.create(
+                    poll=instance,
+                    text=option_data['text'].strip(),
+                    order=option_data.get('order', i)
+                )
+        
+        return instance
 
 
 class VoteSerializer(serializers.ModelSerializer):
@@ -233,3 +280,70 @@ class UserSerializer(serializers.ModelSerializer):
     
     def get_votes_count(self, obj):
         return obj.votes.count()
+
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    """Serializer for user registration."""
+    password = serializers.CharField(write_only=True, min_length=8)
+    password_confirm = serializers.CharField(write_only=True)
+    
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'password', 'password_confirm']
+    
+    def validate_username(self, value):
+        """Validate username uniqueness."""
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("A user with this username already exists.")
+        return value
+    
+    def validate_email(self, value):
+        """Validate email uniqueness."""
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return value
+    
+    def validate(self, attrs):
+        """Validate password confirmation."""
+        if attrs['password'] != attrs['password_confirm']:
+            raise serializers.ValidationError("Passwords don't match.")
+        return attrs
+    
+    def create(self, validated_data):
+        """Create new user."""
+        validated_data.pop('password_confirm')
+        user = User.objects.create_user(**validated_data)
+        Token.objects.create(user=user)
+        return user
+
+
+class UserLoginSerializer(serializers.Serializer):
+    """Serializer for user login."""
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+    
+    def validate(self, attrs):
+        """Validate user credentials."""
+        username = attrs.get('username')
+        password = attrs.get('password')
+        
+        if username and password:
+            user = authenticate(username=username, password=password)
+            if not user:
+                raise serializers.ValidationError("Invalid credentials.")
+            if not user.is_active:
+                raise serializers.ValidationError("User account is disabled.")
+            attrs['user'] = user
+        else:
+            raise serializers.ValidationError("Must include username and password.")
+        
+        return attrs
+
+
+class TokenSerializer(serializers.ModelSerializer):
+    """Serializer for authentication tokens."""
+    user = UserSerializer(read_only=True)
+    
+    class Meta:
+        model = Token
+        fields = ['key', 'user']
